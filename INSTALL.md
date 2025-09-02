@@ -33,10 +33,6 @@
    pip install -r requirements-minimal.txt
    ```
    
-   **Alternative (may fail on Windows):**
-   ```bash
-   pip install -r requirements.txt
-   ```
 
 ## If Installation Fails
 

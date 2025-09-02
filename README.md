@@ -4,7 +4,7 @@ An end-to-end, fair, data-driven credit scoring prototype for Grab partners (dri
 
 ## Contents
 
--   requirements.txt: Python dependencies
+-   requirements-minimal.txt: Python dependencies (reliable installation)
 -   src/generate_data.py: Simulated data generation
 -   src/train_model.py: Training, evaluation, and fairness analysis/mitigation
 -   run_project.py: Complete pipeline runner

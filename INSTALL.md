@@ -50,7 +50,7 @@ pip install jupyter fairlearn shap scipy joblib
 ### Option 3: Update pip first
 ```bash
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements-minimal.txt
 ```
 
 ### Option 4: Use conda instead
@@ -68,15 +68,16 @@ python -m pip install --upgrade pip setuptools wheel
 ```
 
 ### 2. C++ compiler error (Windows)
-**Solution:** Install Visual Studio Build Tools or use pre-compiled packages
+**Solution:** Use individual package installation
 ```bash
-pip install --only-binary=all -r requirements.txt
+pip install numpy pandas scikit-learn matplotlib seaborn
+pip install jupyter fairlearn shap scipy joblib
 ```
 
 ### 3. Permission error
 **Solution:** Use --user flag
 ```bash
-pip install --user -r requirements.txt
+pip install --user -r requirements-minimal.txt
 ```
 
 ## Verify Installation

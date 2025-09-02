@@ -1,0 +1,23 @@
+Project Nova
+Equitable Credit Scoring Engine
+Project Description
+The Problem
+Many gig economy workers, including Grab's most reliable driver and merchant-partners, are "credit invisible." They have consistent income streams but often lack the formal credit histories (e.g., from traditional bank loans or credit cards) that are required to access standard fi nancial products. This creates a signifi cant barrier, preventing them from securing loans to invest in their business—like upgrading a vehicle or expanding a food stall—or managing personal fi nancial emergencies, thereby limiting their economic mobility.
+The Vision
+An equitable fi nancial system where a partner's access to capital is determined by their proven performance and reliability within the Grab ecosystem, not just by traditional, often exclusionary, credit metrics. The vision is to create a fair, data-driven pathway to fi nancial products, unlocking opportunities for partners to grow and achieve greater fi nancial stability.
+The Challenge
+Build a machine learning model that generates an alternative, fair credit score for Grab partners. Using a diverse, simulated dataset—which could include earnings history, trip frequency, customer ratings, driving behavior, and transaction patterns—the model must accurately assess a partner's creditworthiness. A critical and mandatory component of this challenge is to investigate, document, and actively mitigate potential biases within the data and the model to ensure the scoring system is equitable and does not unfairly penalize any group of partners.
+Expected Outcomes
+● A functional machine learning model that ingests simulated partner data and outputs a quantifi able credit score.
+● A clear presentation (e.g., a Jupyter notebook or detailed report) of the data exploration, feature engineering, and model selection process.
+● A dedicated section in the submission that analyzes potential sources of bias in the data and details the specifi c strategies implemented to promote fairness in the model's predictions.
+● A well-documented codebase that allows for the replication of the training and evaluation process.
+Potential Technical Skills and Stack
+● Core: Machine Learning, Data Analysis, Statistical Modeling.
+● Frameworks: Experience with ML frameworks like Scikit-learn, TensorFlow, or PyTorch.
+● Concepts: Understanding of classifi cation/regression models, feature engineering, and a critical awareness of fairness, accountability, and transparency (FAT) in AI.
+Use Cases in Grab Ecosystem
+A solution from Project Nova could be a cornerstone of Grab Financial Group's off erings, promoting fi nancial inclusion for our partners.
+● Driver-Partner Vehicle Loans: A driver with a high "Nova Score" based on excellent service and consistent earnings, but who lacks a traditional credit history, could be pre-approved for a fair-interest loan to upgrade their vehicle, reducing their maintenance costs and increasing their earning potential.
+● Merchant-Partner Business Expansion: A small food stall owner with consistently high ratings and growing sales volume could leverage their Nova Score to secure a micro-loan from Grab. This capital could be used to purchase new kitchen equipment or even fund the opening of a second location, directly fueling their business growth.
+● Personalized Financial Products: The Nova Score could be used to off er partners more than just loans. It could unlock access to tailored insurance products with fair premiums or other fi nancial services, all based on their demonstrated reliability and performance on the Grab platform.

@@ -21,9 +21,18 @@ Generated during execution:
    .\.venv\Scripts\Activate.ps1
 
 2) Install dependencies:
-   pip install -r requirements.txt
    
-   **If installation fails**, see INSTALL.md for troubleshooting
+   **✅ RECOMMENDED (tested on Windows):**
+   ```bash
+   pip install -r requirements-minimal.txt
+   ```
+   
+   **Alternative:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+   
+   **If issues persist**, see INSTALL.md for troubleshooting
 
 3) Run the complete pipeline:
    python run_project.py

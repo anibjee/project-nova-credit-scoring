@@ -1,5 +1,7 @@
 # Installation Guide
 
+> ✅ **TESTED SOLUTION**: Use `pip install -r requirements-minimal.txt` - this works reliably on Windows and other platforms!
+
 ## Quick Start
 
 1. **Create virtual environment:**
@@ -25,6 +27,13 @@
    ```
 
 3. **Install dependencies:**
+   
+   **✅ RECOMMENDED (Works on Windows):**
+   ```bash
+   pip install -r requirements-minimal.txt
+   ```
+   
+   **Alternative (may fail on Windows):**
    ```bash
    pip install -r requirements.txt
    ```

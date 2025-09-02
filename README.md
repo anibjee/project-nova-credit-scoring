@@ -6,10 +6,14 @@ An end-to-end, fair, data-driven credit scoring prototype for Grab partners (dri
 - requirements.txt: Python dependencies
 - src/generate_data.py: Simulated data generation
 - src/train_model.py: Training, evaluation, and fairness analysis/mitigation
+- run_project.py: Complete pipeline runner
+- notebooks/01_eda_and_fairness.ipynb: EDA and fairness analysis notebook
+- .gitignore: Git ignore file
+
+Generated during execution:
 - data/: Generated datasets
 - models/: Saved models and artifacts
 - reports/: Metrics and plots
-- notebooks/01_eda_and_fairness.ipynb: EDA and fairness analysis notebook
 
 ## Quickstart
 1) Create and activate a virtual environment (PowerShell on Windows):
@@ -19,10 +23,16 @@ An end-to-end, fair, data-driven credit scoring prototype for Grab partners (dri
 2) Install dependencies:
    pip install -r requirements.txt
 
-3) Generate simulated dataset:
+3) Run the complete pipeline:
+   python run_project.py
+
+## Manual Steps (Alternative)
+If you prefer to run steps individually:
+
+1) Generate simulated dataset:
    python src/generate_data.py --n 50000 --seed 42 --out data/partners.csv
 
-4) Train model, evaluate metrics, and produce Nova Scores with fairness report:
+2) Train model with fairness optimization:
    python src/train_model.py \
      --data data/partners.csv \
      --model_out models/model.pkl \
@@ -30,9 +40,6 @@ An end-to-end, fair, data-driven credit scoring prototype for Grab partners (dri
      --fairness_out reports/fairness.json \
      --scores_out data/partners_with_scores.csv \
      --mitigation equalized_odds
-
-5) Open the notebook for EDA and fairness exploration:
-   jupyter notebook notebooks/01_eda_and_fairness.ipynb
 
 ## Fairness Methodology (Summary)
 - Sensitive attributes: gender, region (proxy for location), role

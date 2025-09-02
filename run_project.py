@@ -54,16 +54,15 @@ def main():
         --mitigation equalized_odds""".replace('\n        ', ' ')):
         sys.exit(1)
     
-    # Step 4: Show results
-    print("\n📈 Step 4: Displaying results...")
-    run_command("python show_results.py")
+    # Step 4: Completion message
+    print("\n✅ Training complete!")
     
     print("\n" + "=" * 70)
     print("🎉 PROJECT NOVA PIPELINE COMPLETE!")
-    print("📋 Next steps:")
-    print("   • Run 'jupyter notebook notebooks/01_eda_and_fairness.ipynb' for analysis")
+    print("📋 Results available:")
     print("   • Check 'reports/' for detailed metrics")
     print("   • View 'data/partners_scores_*.csv' for Nova scores")
+    print("   • Models saved in 'models/' directory")
     print("=" * 70)
 
 if __name__ == "__main__":

@@ -22,6 +22,8 @@ Generated during execution:
 
 2) Install dependencies:
    pip install -r requirements.txt
+   
+   **If installation fails**, see INSTALL.md for troubleshooting
 
 3) Run the complete pipeline:
    python run_project.py

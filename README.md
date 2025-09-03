@@ -22,10 +22,12 @@ Generated during execution:
 ## Quickstart
 
 1. Create and activate a virtual environment (PowerShell on Windows):
+   ```bash
    python -m venv .venv
    .\.venv\Scripts\Activate.ps1
-
-2. Install dependencies:
+   ```
+   
+3. Install dependencies:
 
     **✅ RECOMMENDED (tested on Windows):**
 
@@ -35,17 +37,24 @@ Generated during execution:
 
     **If issues persist**, see INSTALL.md for troubleshooting
 
-3. Run the complete pipeline:
+4. Run the complete pipeline:
+   ```bash
    python run_project.py
-
+   ```
+   
 ## Manual Steps (Alternative)
 
 If you prefer to run steps individually:
 
 1. Generate simulated dataset:
-   python src/generate_data.py --n 50000 --seed 42 --out data/partners.csv
 
-2. Train model with fairness optimization:
+   ```bash
+   python src/generate_data.py --n 50000 --seed 42 --out data/partners.csv
+   ```
+   
+3. Train model with fairness optimization:
+
+   ```bash
    python src/train_model.py \
     --data data/partners.csv \
     --model_out models/model.pkl \
@@ -53,6 +62,7 @@ If you prefer to run steps individually:
     --fairness_out reports/fairness.json \
     --scores_out data/partners_with_scores.csv \
     --mitigation equalized_odds
+   ```   
 
 ## Fairness Methodology (Summary)
 

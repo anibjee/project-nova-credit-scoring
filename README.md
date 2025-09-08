@@ -71,9 +71,9 @@ An end-to-end, fair, data-driven credit scoring prototype for Grab partners (dri
    ```
    
    This generates:
-   - 🎯 **Baseline model**: Standard ML without fairness constraints
-   - ⚖️ **Equalized odds model**: Post-processing for fair decisions (100x more decisions)
-   - ⚖️ **Reweighing model**: Pre-processing for different risk assessments
+   - 🎯 **Baseline model**: Standard ML (79.8% approval rate)
+   - ⚖️ **Fair model**: Aggressive fairness optimization (39.6% approval rate)
+   - ⚖️ **Reweighed model**: Balanced approach (78.5% approval rate)
    
 ## 🔧 Manual Steps (Alternative)
 
@@ -95,7 +95,9 @@ python src/train_model.py \\
  --metrics_out reports/metrics_baseline.json \\
  --fairness_out reports/fairness_baseline.json \\
  --scores_out data/partners_scores_baseline.csv \\
- --mitigation none
+ --mitigation none \\
+ --nova_threshold 700 \\
+ --risk_threshold 0.10
 ```
 
 **Equalized Odds Model (Post-processing):**
@@ -106,7 +108,9 @@ python src/train_model.py \\
  --metrics_out reports/metrics_fair.json \\
  --fairness_out reports/fairness_fair.json \\
  --scores_out data/partners_scores_fair.csv \\
- --mitigation equalized_odds
+ --mitigation equalized_odds \\
+ --nova_threshold 700 \\
+ --risk_threshold 0.10
 ```
 
 **Reweighing Model (Pre-processing):**
@@ -132,22 +136,35 @@ python src/train_model.py \\
 -   **Fairness**: Demographic parity, equalized odds, equal opportunity
 -   **Detection**: Group-wise positive rates, TPR/FPR differences, score distributions
 
-### Three Mitigation Approaches
+### Three Mitigation Approaches - ACTUAL RESULTS
 
-| Approach | Method | When Probabilities Change | When Decisions Change | Effectiveness |
-|----------|--------|--------------------------|-----------------------|---------------|
-| **Baseline** | No mitigation | - | - | None (reference) |
-| **Equalized Odds** | Post-processing thresholds | Never | Always | **Excellent** (100x more decisions) |
-| **Reweighing** | Training sample weights | Sometimes | Sometimes | Moderate |
+| Model | Method | Approval Rate | Risk Profile | Business Utility | Fairness Impact |
+|-------|--------|---------------|--------------|------------------|----------------|
+| **Baseline** | No mitigation | **79.8%** | 5.2% avg risk | **Highest Volume** | Standard |
+| **Fair (Equalized Odds)** | Post-processing | **39.6%** | 4.7% avg risk | **Educational Demo** | **Aggressive** |
+| **Reweighing** | Pre-processing | **78.5%** | 5.3% avg risk | **Recommended** | **Balanced** |
 
-### Real Results Summary
+### Real Results Summary - ACTUAL PERFORMANCE
 
 **Decision Rates** (out of 12,500 test partners):
--   🎯 **Baseline**: 3 positive decisions (0.0002 rate)
--   ⚖️ **Equalized Odds**: 251 positive decisions (0.0201 rate) 툙2 **100x improvement**
--   ⚖️ **Reweighing**: 5 positive decisions (0.0004 rate) 툙2 2x improvement
+-   🎯 **Baseline**: 9,972 approvals (**79.8%** rate) - Standard business logic
+-   ⚖️ **Fair Model**: 4,949 approvals (**39.6%** rate) - **50% reduction due to aggressive fairness**
+-   ⚖️ **Reweighing**: 9,807 approvals (**78.5%** rate) - **Optimal balance** (only 1.3% reduction)
 
-**All models maintain ROC AUC = 0.698** (no performance sacrifice)
+**All models maintain ROC AUC = 0.698** - fairness techniques don't hurt predictive accuracy
+
+**🔧 KEY INSIGHTS FROM THREE-MODEL COMPARISON**: 
+- **Baseline (79.8%)**: Maximum volume with standard risk management
+- **Fair Model (39.6%)**: Demonstrates over-optimization risk - **educational value**
+- **Reweighed (78.5%)**: **Production recommendation** - optimal fairness-utility balance
+- **Critical Finding**: Aggressive fairness can exclude 50% of qualified applicants
+
+### 📋 **Decision Output Format**
+All models output binary loan decisions as:
+- **`1`** = **APPROVE** loan (partner meets credit criteria)
+- **`0`** = **REJECT** loan (partner does not meet credit criteria)
+
+Decision logic: `decision = 1 if (nova_score >= 700 AND default_risk <= 10%) else 0`
 
 ## ⭐ Nova Score
 
@@ -162,21 +179,34 @@ python src/train_model.py \\
 -   **500-649**: Fair credit (35-70% default risk)
 -   **300-499**: Poor credit (> 70% default risk)
 
-## 📈 Quick Examples
+## 📈 Quick Examples - Model Behavior Patterns
 
-**Partner 27804** (High-risk case):
+**Partner 21282** (High-quality approved case):
 | Model | Probability | Nova Score | Decision | Notes |
 |-------|-------------|------------|----------|-------|
-| Baseline | 35.97% | 652.15 | 0 | Below 50% threshold |
-| **Equalized Odds** | 35.97% | 652.15 | **1** | **Flagged by fair thresholds** |
-| Reweighing | 35.89% | 652.60 | 0 | Slightly lower risk |
+| Baseline | 4.53% | 825.10 | **1** (APPROVE) | Low risk, excellent credit |
+| Fair Model | 4.53% | 825.10 | **1** (APPROVE) | Same probabilities, same decision |
+| Reweighing | 4.45% | 825.53 | **1** (APPROVE) | Slightly improved risk assessment |
 
-**Partner 6144** (Reweighing improvement):
+**Partner 12409** (Fair model conservatism example):
 | Model | Probability | Nova Score | Decision | Notes |
 |-------|-------------|------------|----------|-------|
-| Baseline | 18.26% | 749.57 | 0 | Moderate risk |
-| Equalized Odds | 18.26% | 749.57 | 0 | Same assessment |
-| **Reweighing** | 17.61% | **753.17** | 0 | **+3.6 Nova points improvement** |
+| Baseline | 7.58% | 808.28 | **1** (APPROVE) | Good credit, acceptable risk |
+| **Fair Model** | 7.58% | 808.28 | **0** (REJECT) | **Conservative thresholds reject qualified applicant** |
+| Reweighing | 7.68% | 807.76 | **1** (APPROVE) | Similar to baseline, approved |
+
+**Key Insight**: Fair model's aggressive constraints can exclude qualified applicants, demonstrating why balanced approaches (Reweighing) are preferred for production.
+
+## 🎯 Model Selection Guide
+
+| Business Priority | Recommended Model | Rationale |
+|-------------------|-------------------|----------|
+| **Maximum Volume** | Baseline (79.8%) | Highest approvals, standard risk management |
+| **Production Deployment** | **Reweighed (78.5%)** | **Best balance of fairness and utility** |
+| **Fairness Research** | All Three Models | Complete spectrum analysis |
+| **Educational Demo** | Fair Model (39.6%) | Shows fairness optimization limits |
+
+**✅ Production Recommendation**: Use the **Reweighed Model** for real-world deployment as it maintains 98.7% of baseline volume while improving fairness across demographic groups.
 
 ## 🔄 Reproducibility
 

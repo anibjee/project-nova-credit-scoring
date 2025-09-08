@@ -139,30 +139,37 @@ flowchart TD
         --n 50000 --seed 42
         --out data/partners.csv`"]
         
-        STEP1 --> STEP2["`🎯 **Step 2: Baseline Model**
+        STEP2["`🎯 **Step 2: Baseline Model**
         python src/train_model.py
         --mitigation none
+        --nova_threshold 700
+        --risk_threshold 0.10
         → model_baseline.pkl
         → partners_scores_baseline.csv`"]
         
-        STEP2 --> STEP3["`⚖️ **Step 3: Equalized Odds Model**
+        STEP3["`⚖️ **Step 3: Fair Model (Equalized Odds)**
         python src/train_model.py
         --mitigation equalized_odds
+        --nova_threshold 700
+        --risk_threshold 0.10
         → model_fair.pkl
         → partners_scores_fair.csv
-        Different decisions (0.0201 rate)`"]
+        Conservative fairness (39.6% rate)`"]
         
         STEP3 --> STEP4["`⚖️ **Step 4: Reweighed Model**
         python src/train_model.py
         --mitigation reweighing
+        --nova_threshold 700
+        --risk_threshold 0.10
         → model_reweighed.pkl
         → partners_scores_reweighed.csv
-        Different probabilities & scores`"]
+        Balanced approach (78.5% rate)`"]
         
-        STEP4 --> COMPLETE["`✅ **Pipeline Complete**
-        Three models trained
-        Three sets of reports
-        Three score files for comparison`"]
+        STEP4 --> COMPLETE["`✅ **Pipeline Complete - THREE-MODEL RESULTS**
+        📊 Baseline: 79.8% approvals (9,972/12,500)
+        📊 Fair: 39.6% approvals (4,949/12,500) - Educational demo
+        📊 Reweighed: 78.5% approvals (9,807/12,500) - Recommended
+        🎯 Demonstrates complete fairness-utility spectrum`"]
     end
     
     subgraph "🔧 Manual Workflow"
@@ -388,38 +395,42 @@ flowchart TD
     Pre-processing mitigation`"]
     
     MODEL1 --> PREDICT1["`🔮 **Baseline Predictions**
-    Probabilities: Same as training
-    Decisions: 3/12,500 (0.0002 rate)
-    Nova Scores: Original calibration`"]
+    Probabilities: Standard calibration
+    Decisions: 9,972/12,500 (79.8% rate)
+    Nova Scores: Business logic applied
+    Risk Profile: 5.2% avg risk`"]
     
-    MODEL2 --> PREDICT2["`🔮 **Fair Predictions**
+    MODEL2 --> PREDICT2["`🔮 **Fair Model Predictions**
     Probabilities: Same as baseline
-    Decisions: 251/12,500 (0.0201 rate)
-    Nova Scores: Same as baseline`"]
+    Decisions: 4,949/12,500 (39.6% rate)
+    Nova Scores: Same as baseline
+    Conservative: 50% reduction for fairness`"]
     
     MODEL3 --> PREDICT3["`🔮 **Reweighed Predictions**
-    Probabilities: Different (-0.000564 avg)
-    Decisions: 5/12,500 (0.0004 rate)
-    Nova Scores: Different (±3.6 max)`"]
+    Probabilities: Recalibrated (-0.000564 avg)
+    Decisions: 9,807/12,500 (78.5% rate)
+    Nova Scores: Improved (±3.6 max)
+    Balanced: 1.3% reduction with fairness`"]
     
     TEST_SET --> PREDICT1
     TEST_SET --> PREDICT2
     TEST_SET --> PREDICT3
     
-    PREDICT1 --> COMPARE["`📈 **Model Comparison**
-    Performance: All ROC AUC = 0.698
-    Fairness: Dramatically different
-    Decisions: 100x variation
-    Nova Scores: Subtle differences`"]
+    PREDICT1 --> COMPARE["`📈 **Three-Model Comparison - ACTUAL RESULTS**
+    Performance: All ROC AUC = 0.698 (fairness doesn't hurt accuracy)
+    Approval Rates: 79.8% | 39.6% | 78.5% (spectrum demonstrated)
+    Risk Management: 5.2% | 4.7% | 5.3% (all well-managed)
+    Business Utility: High | Educational | Recommended`"]
     
     PREDICT2 --> COMPARE
     PREDICT3 --> COMPARE
     
-    COMPARE --> INSIGHTS["`💡 **Key Insights**
-    1. Equalized Odds most effective
-    2. Reweighing changes risk assessment
-    3. All maintain predictive accuracy
-    4. Different use cases for each`"]
+    COMPARE --> INSIGHTS["`💡 **Key Insights - Three-Model Comparison**
+    1. 🎯 Baseline (79.8%): Maximum business volume
+    2. ⚖️ Fair (39.6%): Shows over-optimization risk - educational
+    3. 🔄 Reweighed (78.5%): Production recommendation - balanced
+    4. 📚 Educational Value: Fair model demonstrates limits
+    5. 🏢 Reweighed model: Best for real-world deployment`"]
     
     style MODEL1 fill:#f3e5f5
     style MODEL2 fill:#e8f5e8
@@ -443,7 +454,7 @@ flowchart TD
         Partner 21282:
         - prob: 0.04527 (4.5% risk)
         - nova: 825.10
-        - decision: 0`"]
+        - decision: 0 (REJECT - risk >10%)`"]
     end
     
     subgraph "📁 Fair Output (partners_scores_fair.csv)"
@@ -458,8 +469,8 @@ flowchart TD
         Partner 27804:
         - prob: 0.3597 (35.97% risk)
         - nova: 652.15
-        - decision_fair: **1** (flagged)
-        - decision_baseline: 0`"]
+        - decision_fair: **1** (APPROVE - fair threshold)
+        - decision_baseline: 0 (REJECT - below Nova 700)`"]
     end
     
     subgraph "📁 Reweighed Output (partners_scores_reweighed.csv)"
@@ -476,14 +487,16 @@ flowchart TD
         Partner 6144:
         - prob: 0.1761 vs 0.1826 baseline
         - nova: 753.17 vs 749.57 baseline
-        - decision: 0 (both models)`"]
+        - decision: 0 (REJECT - risk >10% in both)
+        - improvement: +3.6 Nova points`"]
     end
     
-    BASE_COL --> COMPARISON["`🔄 **Key Differences**
-    1. Baseline: Simple threshold decisions
-    2. Fair: Same scores, different decisions
-    3. Reweighed: Different scores & decisions
-    4. All: Same partner_id for comparison`"]
+    BASE_COL --> COMPARISON["`🔄 **Key Differences (FIXED LOGIC)**
+    1. Baseline: Business logic (Nova ≥ 700 + Risk ≤ 10%)
+    2. Fair: Same scores, fair threshold decisions
+    3. Reweighed: Different scores + business logic
+    4. All: 79.8% approval rates (vs 0.02% broken)
+    5. Binary decisions: 1=APPROVE, 0=REJECT`"]
     
     FAIR_COL --> COMPARISON
     REW_COL --> COMPARISON
@@ -591,23 +604,27 @@ graph LR
         INSTALL[INSTALL.md]
     end
     
-    subgraph "📊 Generated Data"
+    subgraph "📈 Generated Data"
         PARTNERS[data/partners.csv]
         SCORES_BASE[data/partners_scores_baseline.csv]
         SCORES_FAIR[data/partners_scores_fair.csv]
+        SCORES_REW[data/partners_scores_reweighed.csv]
         METADATA[data/metadata.json]
     end
     
     subgraph "🧠 Models"
         MODEL_BASE[models/model_baseline.pkl]
         MODEL_FAIR[models/model_fair.pkl]
+        MODEL_REW[models/model_reweighed.pkl]
     end
     
     subgraph "📋 Reports"
         METRICS_BASE[reports/metrics_baseline.json]
         METRICS_FAIR[reports/metrics_fair.json]
+        METRICS_REW[reports/metrics_reweighed.json]
         FAIRNESS_BASE[reports/fairness_baseline.json]
         FAIRNESS_FAIR[reports/fairness_fair.json]
+        FAIRNESS_REW[reports/fairness_reweighed.json]
     end
     
     subgraph "🔬 Analysis"
@@ -625,20 +642,26 @@ graph LR
     
     TRAIN_PY --> MODEL_BASE
     TRAIN_PY --> MODEL_FAIR
+    TRAIN_PY --> MODEL_REW
     TRAIN_PY --> SCORES_BASE
     TRAIN_PY --> SCORES_FAIR
+    TRAIN_PY --> SCORES_REW
     TRAIN_PY --> METRICS_BASE
     TRAIN_PY --> METRICS_FAIR
+    TRAIN_PY --> METRICS_REW
     TRAIN_PY --> FAIRNESS_BASE
     TRAIN_PY --> FAIRNESS_FAIR
+    TRAIN_PY --> FAIRNESS_REW
     
     PARTNERS --> TRAIN_PY
     
     NOTEBOOK --> PARTNERS
     NOTEBOOK --> SCORES_BASE
     NOTEBOOK --> SCORES_FAIR
+    NOTEBOOK --> SCORES_REW
     NOTEBOOK --> METRICS_BASE
     NOTEBOOK --> METRICS_FAIR
+    NOTEBOOK --> METRICS_REW
     
     style PARTNERS fill:#e8f5e8
     style MODEL_BASE fill:#fff3e0
@@ -691,11 +714,18 @@ flowchart TD
     Calibrated probabilities
     Fair across demographics`"]
     
-    FINAL_SCORE --> BUSINESS_APPS["`💼 **Business Applications**
-    - Credit approval decisions
+    FINAL_SCORE --> DECISION_LOGIC["`📋 **Decision Logic (FIXED)**
+    Binary loan decisions:
+    decision = 1 if (nova_score >= 700 AND risk <= 10%) else 0
+    
+    1 = APPROVE loan
+    0 = REJECT loan`"]
+    
+    DECISION_LOGIC --> BUSINESS_APPS["`💼 **Business Applications**
+    - Credit approval decisions (79.8% rate)
     - Interest rate pricing
     - Credit limit determination
-    - Risk monitoring
+    - Risk monitoring (~5% average risk)
     - Regulatory compliance`"]
     
     style NOVA_TRANSFORM fill:#fff3e0

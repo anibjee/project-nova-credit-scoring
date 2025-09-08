@@ -30,6 +30,7 @@ env/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+notebooks/01_eda_and_fairness_previous.ipynb
 
 # IDE
 .vscode/

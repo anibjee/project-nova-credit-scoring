@@ -1,6 +1,6 @@
-# Project Nova - Complete System Flowchart
+# Project Nova - Complete Three-Model System Flowchart
 
-This document contains comprehensive flowcharts showing the architecture, workflow, and data flow of the Project Nova equitable credit scoring system.
+This document contains comprehensive flowcharts showing the architecture, workflow, and data flow of the Project Nova equitable credit scoring system. **Project Nova implements three distinct modeling approaches** to demonstrate comprehensive fairness strategies: Baseline (no mitigation), Equalized Odds (post-processing), and Reweighing (pre-processing).
 
 ## 1. High-Level System Architecture
 
@@ -62,12 +62,14 @@ graph TB
             MODELS["`🧠 **models/**
             Trained Models
             - model_baseline.pkl
-            - model_fair.pkl`"]
+            - model_fair.pkl
+            - model_reweighed.pkl`"]
             
             REPORTS["`📋 **reports/**
             Analysis Results
-            - metrics_*.json
-            - fairness_*.json`"]
+            - metrics_*.json (3 models)
+            - fairness_*.json (3 models)
+            - Comparison analysis`"]
         end
     end
     
@@ -140,26 +142,41 @@ flowchart TD
         STEP1 --> STEP2["`🎯 **Step 2: Baseline Model**
         python src/train_model.py
         --mitigation none
-        → model_baseline.pkl`"]
+        → model_baseline.pkl
+        → partners_scores_baseline.csv`"]
         
-        STEP2 --> STEP3["`⚖️ **Step 3: Fair Model**
+        STEP2 --> STEP3["`⚖️ **Step 3: Equalized Odds Model**
         python src/train_model.py
         --mitigation equalized_odds
-        → model_fair.pkl`"]
+        → model_fair.pkl
+        → partners_scores_fair.csv
+        Different decisions (0.0201 rate)`"]
         
-        STEP3 --> COMPLETE["`✅ **Pipeline Complete**
-        Models trained
-        Reports generated
-        Scores calculated`"]
+        STEP3 --> STEP4["`⚖️ **Step 4: Reweighed Model**
+        python src/train_model.py
+        --mitigation reweighing
+        → model_reweighed.pkl
+        → partners_scores_reweighed.csv
+        Different probabilities & scores`"]
+        
+        STEP4 --> COMPLETE["`✅ **Pipeline Complete**
+        Three models trained
+        Three sets of reports
+        Three score files for comparison`"]
     end
     
     subgraph "🔧 Manual Workflow"
         MANUAL --> MAN_GEN["`📊 **Generate Data**
         Choose size, seed, output`"]
         MAN_GEN --> MAN_TRAIN["`🤖 **Train Models**
-        Choose mitigation strategy`"]
+        Choose mitigation strategy:
+        - none (baseline)
+        - equalized_odds (post-processing)
+        - reweighing (pre-processing)`"]
         MAN_TRAIN --> MAN_ANALYZE["`📈 **Analyze Results**
-        Use Jupyter notebooks`"]
+        Use Jupyter notebooks
+        Compare fairness metrics
+        Examine Nova score differences`"]
     end
     
     BATCH_COMPLETE --> END_SUCCESS[🎉 Success!]
@@ -339,7 +356,145 @@ flowchart TD
     style EVALUATION fill:#fce4ec
 ```
 
-## 5. Fairness Analysis Workflow
+## 5. Three-Model Fairness Comparison
+
+```mermaid
+flowchart TD
+    INPUT_DATA["`📊 **Input Data**
+    partners.csv (50K records)
+    21 features + target`"] --> SPLIT{Data Splitting}
+    
+    SPLIT --> TRAIN_SET["`🏅 **Training Set**
+    75% of data (37,500 records)
+    Stratified by target variable`"]
+    
+    SPLIT --> TEST_SET["`🧪 **Test Set**
+    25% of data (12,500 records)
+    Used for evaluation`"]
+    
+    TRAIN_SET --> MODEL1["`🎯 **Baseline Model**
+    HistGradientBoostingClassifier
+    No fairness mitigation
+    Standard training`"]
+    
+    TRAIN_SET --> MODEL2["`⚖️ **Fair Model (Equalized Odds)**
+    Same base model
+    + ThresholdOptimizer
+    Post-processing mitigation`"]
+    
+    TRAIN_SET --> MODEL3["`⚖️ **Reweighed Model**
+    HistGradientBoostingClassifier
+    + Sample reweighing
+    Pre-processing mitigation`"]
+    
+    MODEL1 --> PREDICT1["`🔮 **Baseline Predictions**
+    Probabilities: Same as training
+    Decisions: 3/12,500 (0.0002 rate)
+    Nova Scores: Original calibration`"]
+    
+    MODEL2 --> PREDICT2["`🔮 **Fair Predictions**
+    Probabilities: Same as baseline
+    Decisions: 251/12,500 (0.0201 rate)
+    Nova Scores: Same as baseline`"]
+    
+    MODEL3 --> PREDICT3["`🔮 **Reweighed Predictions**
+    Probabilities: Different (-0.000564 avg)
+    Decisions: 5/12,500 (0.0004 rate)
+    Nova Scores: Different (±3.6 max)`"]
+    
+    TEST_SET --> PREDICT1
+    TEST_SET --> PREDICT2
+    TEST_SET --> PREDICT3
+    
+    PREDICT1 --> COMPARE["`📈 **Model Comparison**
+    Performance: All ROC AUC = 0.698
+    Fairness: Dramatically different
+    Decisions: 100x variation
+    Nova Scores: Subtle differences`"]
+    
+    PREDICT2 --> COMPARE
+    PREDICT3 --> COMPARE
+    
+    COMPARE --> INSIGHTS["`💡 **Key Insights**
+    1. Equalized Odds most effective
+    2. Reweighing changes risk assessment
+    3. All maintain predictive accuracy
+    4. Different use cases for each`"]
+    
+    style MODEL1 fill:#f3e5f5
+    style MODEL2 fill:#e8f5e8
+    style MODEL3 fill:#fff3e0
+    style COMPARE fill:#e1f5fe
+    style INSIGHTS fill:#fce4ec
+```
+
+## 6. Output File Comparison
+
+```mermaid
+flowchart TD
+    subgraph "📁 Baseline Output (partners_scores_baseline.csv)"
+        BASE_COL["`**Columns:**
+        - partner_id
+        - prob_default
+        - nova_score
+        - decision`"]
+        
+        BASE_EX["`**Example:**
+        Partner 21282:
+        - prob: 0.04527 (4.5% risk)
+        - nova: 825.10
+        - decision: 0`"]
+    end
+    
+    subgraph "📁 Fair Output (partners_scores_fair.csv)"
+        FAIR_COL["`**Columns:**
+        - partner_id
+        - prob_default (same as baseline)
+        - nova_score (same as baseline)
+        - decision_fair
+        - decision_baseline`"]
+        
+        FAIR_EX["`**Example:**
+        Partner 27804:
+        - prob: 0.3597 (35.97% risk)
+        - nova: 652.15
+        - decision_fair: **1** (flagged)
+        - decision_baseline: 0`"]
+    end
+    
+    subgraph "📁 Reweighed Output (partners_scores_reweighed.csv)"
+        REW_COL["`**Columns:**
+        - partner_id
+        - prob_default (different)
+        - nova_score (different)
+        - decision_reweighed
+        - prob_default_baseline
+        - nova_score_baseline
+        - decision_baseline`"]
+        
+        REW_EX["`**Example:**
+        Partner 6144:
+        - prob: 0.1761 vs 0.1826 baseline
+        - nova: 753.17 vs 749.57 baseline
+        - decision: 0 (both models)`"]
+    end
+    
+    BASE_COL --> COMPARISON["`🔄 **Key Differences**
+    1. Baseline: Simple threshold decisions
+    2. Fair: Same scores, different decisions
+    3. Reweighed: Different scores & decisions
+    4. All: Same partner_id for comparison`"]
+    
+    FAIR_COL --> COMPARISON
+    REW_COL --> COMPARISON
+    
+    style BASE_COL fill:#f3e5f5
+    style FAIR_COL fill:#e8f5e8
+    style REW_COL fill:#fff3e0
+    style COMPARISON fill:#e1f5fe
+```
+
+## 7. Fairness Analysis Workflow
 
 ```mermaid
 ---
@@ -407,7 +562,7 @@ flowchart TD
     style VIZ fill:#e3f2fd
 ```
 
-## 6. File Dependencies and Data Flow
+## 8. File Dependencies and Data Flow
 
 ```mermaid
 ---
@@ -490,7 +645,7 @@ graph LR
     style MODEL_FAIR fill:#f3e5f5
 ```
 
-## 7. Nova Score Calculation Flow
+## 9. Nova Score Calculation Flow
 
 ```mermaid
 ---

@@ -43,8 +43,8 @@ def main():
         --mitigation none""".replace('\n        ', ' ')):
         sys.exit(1)
     
-    # Step 3: Train fair model
-    print("\n⚖️  Step 3: Training fairness-optimized model...")
+    # Step 3: Train fair model (equalized odds)
+    print("\n⚖️  Step 3: Training fairness-optimized model (equalized odds)...")
     if not run_command("""python src/train_model.py ^
         --data data/partners.csv ^
         --model_out models/model_fair.pkl ^
@@ -54,15 +54,33 @@ def main():
         --mitigation equalized_odds""".replace('\n        ', ' ')):
         sys.exit(1)
     
-    # Step 4: Completion message
+    # Step 4: Train reweighed model
+    print("\n⚖️  Step 4: Training reweighed fairness model...")
+    if not run_command("""python src/train_model.py ^
+        --data data/partners.csv ^
+        --model_out models/model_reweighed.pkl ^
+        --metrics_out reports/metrics_reweighed.json ^
+        --fairness_out reports/fairness_reweighed.json ^
+        --scores_out data/partners_scores_reweighed.csv ^
+        --mitigation reweighing""".replace('\n        ', ' ')):
+        sys.exit(1)
+    
+    # Step 5: Completion message
     print("\n✅ Training complete!")
     
     print("\n" + "=" * 70)
     print("🎉 PROJECT NOVA PIPELINE COMPLETE!")
     print("📋 Results available:")
     print("   • Check 'reports/' for detailed metrics")
-    print("   • View 'data/partners_scores_*.csv' for Nova scores")
+    print("     - metrics_baseline.json (no fairness mitigation)")
+    print("     - metrics_fair.json (equalized odds post-processing)")
+    print("     - metrics_reweighed.json (reweighing pre-processing)")
+    print("   • View 'data/partners_scores_*.csv' for Nova scores and decisions")
+    print("     - partners_scores_baseline.csv (standard model)")
+    print("     - partners_scores_fair.csv (fair decisions, same probabilities)")
+    print("     - partners_scores_reweighed.csv (different probabilities & scores)")
     print("   • Models saved in 'models/' directory")
+    print("     - model_baseline.pkl, model_fair.pkl, model_reweighed.pkl")
     print("=" * 70)
 
 if __name__ == "__main__":

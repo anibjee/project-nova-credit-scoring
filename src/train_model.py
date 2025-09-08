@@ -184,6 +184,29 @@ def train(args):
     out_df = raw_test[["partner_id"]].copy()
     out_df["prob_default"] = y_prob
     out_df["nova_score"] = nova
+    
+    # Add appropriate decision columns based on mitigation method
+    if args.mitigation == "equalized_odds":
+        out_df["decision_fair"] = y_pred
+        out_df["decision_baseline"] = (y_prob >= 0.5).astype(int)
+        print(f"Fair model decisions: {y_pred.sum()} positives out of {len(y_pred)} ({y_pred.mean():.4f} rate)")
+        print(f"Baseline decisions: {((y_prob >= 0.5).astype(int)).sum()} positives out of {len(y_pred)} ({((y_prob >= 0.5).astype(int)).mean():.4f} rate)")
+    elif args.mitigation == "reweighing":
+        out_df["decision_reweighed"] = y_pred
+        # For reweighing, also show what baseline would have been (train without weights)
+        baseline_model = CalibratedClassifierCV(pipe, method="isotonic", cv=3)
+        baseline_model.fit(X_train, y_train)  # No sample weights
+        y_prob_baseline = baseline_model.predict_proba(X_test)[:, 1]
+        y_pred_baseline = (y_prob_baseline >= 0.5).astype(int)
+        out_df["prob_default_baseline"] = y_prob_baseline
+        out_df["nova_score_baseline"] = to_nova_score(y_prob_baseline)
+        out_df["decision_baseline"] = y_pred_baseline
+        print(f"Reweighed model decisions: {y_pred.sum()} positives out of {len(y_pred)} ({y_pred.mean():.4f} rate)")
+        print(f"Baseline model decisions: {y_pred_baseline.sum()} positives out of {len(y_pred_baseline)} ({y_pred_baseline.mean():.4f} rate)")
+        print(f"Probability difference (reweighed vs baseline): {(y_prob - y_prob_baseline).mean():.6f}")
+    else:
+        out_df["decision"] = y_pred
+    
     out_df.to_csv(args.scores_out, index=False)
 
     print("Training complete")

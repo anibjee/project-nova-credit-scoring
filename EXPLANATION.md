@@ -927,7 +927,7 @@ seasonality_index,prior_loans,prior_defaults,vehicle_type,fuel_cost_share,defaul
   }
 }
 ```
-```
+
 
 ### Score Distribution Analysis
 
